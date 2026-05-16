@@ -1,944 +1,969 @@
-< !DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Cryptographic Hash Function Interactive Activity</title><style> :root {
-    --bg: #f5f5f2;
-    --panel: #ffffff;
-    --ink: #171717;
-    --muted: #5f5f5f;
-    --line: #d6d6d1;
-    --soft: #ecece8;
-    --dark: #2a2a2a;
-    --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
-    --radius-xl: 28px;
-    --radius-lg: 20px;
-    --radius-md: 14px;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at 10% 0%, rgba(0, 0, 0, 0.045), transparent 32%),
-        radial-gradient(circle at 95% 10%, rgba(0, 0, 0, 0.055), transparent 26%),
-        linear-gradient(135deg, #fafaf8, var(--bg));
-    color: var(--ink);
-    font-family: var(--sans);
-    overflow-x: hidden;
-}
-
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.35;
-    background-image:
-        linear-gradient(var(--line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 80px 80px;
-    mask-image: linear-gradient(to bottom, black, transparent 85%);
-}
-
-.page {
-    position: relative;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 40px 24px 56px;
-}
-
-.hero {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 28px;
-    align-items: stretch;
-    margin-bottom: 26px;
-}
-
-.hero-card,
-.activity-card,
-.pipeline-card,
-.insight-card {
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: var(--shadow);
-    border-radius: var(--radius-xl);
-    backdrop-filter: blur(12px);
-}
-
-.hero-card {
-    padding: 36px;
-    min-height: 280px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    position: relative;
-}
-
-.hero-card::after {
-    content: "01001000 01100001 01110011 01101000";
-    position: absolute;
-    right: -40px;
-    bottom: 18px;
-    font-family: var(--mono);
-    font-size: 34px;
-    letter-spacing: 4px;
-    transform: rotate(-8deg);
-    color: rgba(0, 0, 0, 0.055);
-    white-space: nowrap;
-}
-
-.eyebrow {
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 12px;
-}
-
-h1 {
-    margin: 0;
-    font-size: clamp(42px, 6vw, 78px);
-    line-height: 0.92;
-    letter-spacing: -0.06em;
-    font-weight: 900;
-}
-
-.hero-card p {
-    max-width: 780px;
-    margin: 22px 0 0;
-    color: var(--muted);
-    font-size: 18px;
-    line-height: 1.55;
-}
-
-.score-card {
-    padding: 30px;
-    display: grid;
-    gap: 18px;
-    align-content: center;
-}
-
-.score-big {
-    font-size: 84px;
-    font-weight: 900;
-    letter-spacing: -0.08em;
-    line-height: 0.85;
-}
-
-.score-card p {
-    color: var(--muted);
-    margin: 0;
-    line-height: 1.5;
-}
-
-.progress-shell {
-    height: 14px;
-    background: var(--soft);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    width: 0%;
-    background: repeating-linear-gradient(45deg, #222, #222 8px, #444 8px, #444 16px);
-    transition: width 450ms cubic-bezier(.2, .9, .2, 1);
-}
-
-.layout {
-    display: grid;
-    grid-template-columns: 420px 1fr;
-    gap: 26px;
-    align-items: start;
-}
-
-.activity-card {
-    padding: 24px;
-    position: sticky;
-    top: 20px;
-}
-
-.section-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 16px;
-    margin-bottom: 18px;
-}
-
-h2 {
-    margin: 0;
-    font-size: 26px;
-    letter-spacing: -0.04em;
-}
-
-.tiny {
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 12px;
-}
-
-.rounds {
-    display: grid;
-    gap: 14px;
-}
-
-.round {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: #fbfbfa;
-    padding: 16px;
-    cursor: pointer;
-    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
-}
-
-.round:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-}
-
-.round.active {
-    border-color: #171717;
-    background: #fff;
-    box-shadow: inset 0 0 0 2px #171717, 0 14px 28px rgba(0, 0, 0, 0.09);
-}
-
-.round.done {
-    background: #f0f0ed;
-}
-
-.round-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.round-label {
-    font-weight: 850;
-    letter-spacing: -0.03em;
-}
-
-.badge {
-    width: 34px;
-    height: 34px;
-    border: 1px solid var(--dark);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--dark);
-    background: #fff;
-}
-
-.pair {
-    font-family: var(--mono);
-    display: grid;
-    gap: 8px;
-    font-size: 14px;
-    line-height: 1.35;
-}
-
-.line {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.line strong {
-    min-width: 32px;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.changed {
-    outline: 2px solid #171717;
-    outline-offset: 2px;
-    border-radius: 4px;
-    background: #e4e4df;
-}
-
-.button-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 18px;
-}
-
-button {
-    appearance: none;
-    border: 1px solid #171717;
-    background: #171717;
-    color: #fff;
-    border-radius: 999px;
-    padding: 13px 16px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: transform 160ms ease, background 160ms ease, color 160ms ease;
-}
-
-button:hover {
-    transform: translateY(-1px);
-}
-
-button.secondary {
-    background: transparent;
-    color: #171717;
-}
-
-.pipeline-card {
-    padding: 26px;
-    min-height: 690px;
-}
-
-.example-stage {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    padding: 22px;
-    background: #fbfbfa;
-    margin-bottom: 22px;
-}
-
-.compare-head {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 16px;
-    align-items: center;
-}
-
-.message-box {
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 18px;
-}
-
-.message-box h3 {
-    margin: 0 0 10px;
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-family: var(--mono);
-}
-
-.message-text {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: clamp(18px, 2vw, 26px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    white-space: nowrap;
-}
-
-.vs {
-    width: 60px;
-    height: 60px;
-    border: 1px solid #171717;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-weight: 900;
-    background: #fff;
-}
-
-.difference-note {
-    margin-top: 16px;
-    border-left: 4px solid #171717;
-    padding: 12px 14px;
-    background: #eeeeea;
-    color: var(--dark);
-    line-height: 1.4;
-    display: none;
-}
-
-.difference-note.show {
-    display: block;
-}
-
-.pipeline {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
-    margin-bottom: 22px;
-}
-
-.step {
-    border: 1px solid var(--line);
-    background: #fff;
-    border-radius: 18px;
-    padding: 16px 12px;
-    min-height: 132px;
-    position: relative;
-    opacity: 0.36;
-    transform: translateY(8px);
-    transition: opacity 280ms ease, transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
-}
-
-.step.active {
-    opacity: 1;
-    transform: translateY(0);
-    border-color: #171717;
-    box-shadow: inset 0 0 0 2px #171717, 0 12px 24px rgba(0, 0, 0, 0.08);
-}
-
-.step.done {
-    opacity: 0.78;
-    transform: translateY(0);
-}
-
-.step-num {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 1px solid #171717;
-    display: grid;
-    place-items: center;
-    font-family: var(--mono);
-    font-size: 12px;
-    margin-bottom: 12px;
-}
-
-.step h3 {
-    margin: 0 0 8px;
-    font-size: 14px;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-}
-
-.step p {
-    margin: 0;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.35;
-}
-
-.live-box {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-xl);
-    background: #fff;
-    padding: 22px;
-    min-height: 250px;
-}
-
-.live-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: center;
-    margin-bottom: 18px;
-}
-
-.live-title {
-    font-weight: 900;
-    font-size: 22px;
-    letter-spacing: -0.04em;
-}
-
-.state-pill {
-    border: 1px solid var(--line);
-    background: #f8f8f6;
-    border-radius: 999px;
-    padding: 8px 12px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.output-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
-
-.output {
-    background: #f8f8f6;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    min-height: 148px;
-    overflow: hidden;
-}
-
-.output h4 {
-    margin: 0 0 10px;
-    font-family: var(--mono);
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-}
-
-.code {
-    font-family: var(--mono);
-    word-break: break-all;
-    line-height: 1.55;
-    font-size: 14px;
-}
-
-.hash {
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.blocks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.block {
-    min-width: 42px;
-    text-align: center;
-    border: 1px solid #171717;
-    background: #fff;
-    padding: 7px 8px;
-    border-radius: 10px;
-    font-family: var(--mono);
-    font-size: 12px;
-}
-
-.digest-compare {
-    display: none;
-    margin-top: 18px;
-    padding: 18px;
-    border-radius: var(--radius-lg);
-    background: #eeeeea;
-    border: 1px solid #171717;
-}
-
-.digest-compare.show {
-    display: block;
-}
-
-.digest-compare strong {
-    display: block;
-    font-size: 18px;
-    margin-bottom: 6px;
-}
-
-.digest-compare p {
-    margin: 0;
-    color: var(--dark);
-    line-height: 1.45;
-}
-
-.insight-card {
-    margin-top: 26px;
-    padding: 26px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-}
-
-.insight {
-    border: 1px solid var(--line);
-    background: #fff;
-    border-radius: var(--radius-lg);
-    padding: 20px;
-}
-
-.insight b {
-    display: block;
-    font-size: 18px;
-    margin-bottom: 8px;
-    letter-spacing: -0.03em;
-}
-
-.insight span {
-    color: var(--muted);
-    line-height: 1.45;
-    font-size: 14px;
-}
-
-@media (max-width: 1000px) {
-
-    .hero,
-    .layout {
-        grid-template-columns: 1fr;
-    }
-
-    .activity-card {
-        position: static;
-    }
-
-    .pipeline {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .compare-head {
-        grid-template-columns: 1fr;
-    }
-
-    .vs {
-        margin: 0 auto;
-    }
-
-    .insight-card {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 620px) {
-    .page {
-        padding: 22px 14px 34px;
-    }
-
-    .hero-card,
-    .activity-card,
-    .pipeline-card {
-        padding: 20px;
-    }
-
-    .pipeline,
-    .output-grid,
-    .button-row {
-        grid-template-columns: 1fr;
-    }
-
-    .message-text {
-        white-space: normal;
-    }
-}
-
-</style></head><body><main class="page"><section class="hero"><div class="hero-card"><div><div class="eyebrow">Interactive cryptography activity</div><h1>Can You Spot the Change?</h1><p>Choose a round,
-then watch both messages go through the same hash-function pipeline. The point is simple: humans may miss tiny changes,
-but a cryptographic hash function exposes them through a different digest. </p></div></div><div class="hero-card score-card"><div><div class="eyebrow">Rounds completed</div><div class="score-big"><span id="score">0</span>/3</div></div><div class="progress-shell"><div class="progress-fill" id="progress"></div></div><p>Finish all three rounds to reveal the core lesson behind data integrity and digital fingerprints.</p></div></section><section class="layout"><aside class="activity-card"><div class="section-title"><h2>Choose a Round</h2><span class="tiny">click to inspect</span></div><div class="rounds" id="rounds"></div><div class="button-row"><button id="runBtn">Run Pipeline</button><button class="secondary" id="resetBtn">Reset</button></div></aside><section class="pipeline-card"><div class="section-title"><h2 id="roundTitle">Round 1: Deadline Trap</h2><span class="tiny">real SHA-256 digest</span></div><div class="example-stage"><div class="compare-head"><div class="message-box"><h3>Original</h3><p class="message-text" id="originalText"></p></div><div class="vs">VS</div><div class="message-box"><h3>Modified</h3><p class="message-text" id="modifiedText"></p></div></div><div class="difference-note" id="differenceNote"></div></div><div class="pipeline" id="pipeline"></div><div class="live-box"><div class="live-top"><div class="live-title" id="liveTitle">Ready to hash</div><div class="state-pill" id="statePill">Step 0 / 5</div></div><div class="output-grid"><div class="output"><h4>Original path</h4><div class="code" id="originalOutput">Click “Run Pipeline” to start.</div></div><div class="output"><h4>Modified path</h4><div class="code" id="modifiedOutput">The modified message will be processed in parallel.</div></div></div><div class="digest-compare" id="digestCompare"><strong>Result: same-looking messages,
-different fingerprints.</strong><p id="lessonText"></p></div></div></section></section><section class="insight-card"><div class="insight"><b>1. Integrity</b><span>A digest helps verify that a message,
-file,
-or transaction was not silently changed.</span></div><div class="insight"><b>2. One tiny change</b><span>Changing one character is enough to produce a completely different SHA-256 digest.</span></div><div class="insight"><b>3. Human vs hash</b><span>A human may miss the difference;
-
-a hash function treats the data exactly byte by byte.</span></div></section></main><script>const examples=[ {
-    title: "Round 1: Deadline Trap",
-        original: "Submit before 11:59 PM.",
-        modified: "Submit before 11:59 AM.",
-        diff: "Only two letters changed: PM became AM. To a student, that can change the entire deadline.",
-        lesson: "The deadline message looks almost the same, but the digest proves the data is no longer identical."
-}
-
-,
-{
-title: "Round 2: Payment Trap",
-    original: "Pay 500 EGP to Omar.",
-    modified: "Pay 500 EGP to 0mar.",
-    diff: "The letter O in Omar was replaced with the number 0. It is visually similar, but digitally different.",
-    lesson: "The name appears close to the human eye, but hashing exposes that the actual bytes changed."
-}
-
-,
-{
-title: "Round 3: File Trust Trap",
-    original: "I trust this file.",
-    modified: "I trust this fi1e.",
-    diff: "The letter l in file was replaced with the number 1. This is a classic hidden-character trick.",
-    lesson: "Even a tiny character replacement creates a new digital fingerprint."
-}
-
-];
-
-const steps=[ {
-    title: "Input", desc: "Take the exact message text."
-}
-
-,
-{
-title: "Bytes", desc: "Convert every character into bytes."
-}
-
-,
-{
-title: "Padding", desc: "Prepare data to fit fixed-size blocks."
-}
-
-,
-{
-title: "Blocks", desc: "Split prepared data into chunks."
-}
-
-,
-{
-title: "Compress", desc: "Mix blocks using SHA-256 operations."
-}
-
-,
-{
-title: "Digest", desc: "Output the final fixed-length fingerprint."
-}
-
-];
-
-let selected=0;
-let completed=new Set();
-let running=false;
-
-const roundsEl=document.getElementById("rounds");
-const pipelineEl=document.getElementById("pipeline");
-const scoreEl=document.getElementById("score");
-const progressEl=document.getElementById("progress");
-const originalTextEl=document.getElementById("originalText");
-const modifiedTextEl=document.getElementById("modifiedText");
-const roundTitleEl=document.getElementById("roundTitle");
-const differenceNoteEl=document.getElementById("differenceNote");
-const originalOutputEl=document.getElementById("originalOutput");
-const modifiedOutputEl=document.getElementById("modifiedOutput");
-const liveTitleEl=document.getElementById("liveTitle");
-const statePillEl=document.getElementById("statePill");
-const digestCompareEl=document.getElementById("digestCompare");
-const lessonTextEl=document.getElementById("lessonText");
-
-function renderRounds() {
-    roundsEl.innerHTML=examples.map((ex, i)=> ` <article class="round ${i === selected ? " active" : " "} ${completed.has(i) ? " done" : " "}" data-index="${i}" > <div class="round-head" > <div class="round-label" >Round $ {
-            i + 1
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cryptographic Hash Function Interactive Activity</title>
+    <style>
+        :root {
+            --bg: #f5f5f2;
+            --panel: #ffffff;
+            --ink: #171717;
+            --muted: #5f5f5f;
+            --line: #d6d6d1;
+            --soft: #ecece8;
+            --dark: #2a2a2a;
+            --shadow: 0 18px 45px rgba(0, 0, 0, 0.10);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        </div> <div class="badge" >$ {
-            completed.has(i) ? "✓" : "?"
+        * {
+            box-sizing: border-box;
         }
 
-        </div> </div> <div class="pair" > <div class="line" ><strong>A</strong><span>$ {
-            escapeHTML(ex.original)
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(0, 0, 0, 0.045), transparent 32%),
+                radial-gradient(circle at 95% 10%, rgba(0, 0, 0, 0.055), transparent 26%),
+                linear-gradient(135deg, #fafaf8, var(--bg));
+            color: var(--ink);
+            font-family: var(--sans);
+            overflow-x: hidden;
         }
 
-        </span></div> <div class="line" ><strong>B</strong><span>$ {
-            escapeHTML(ex.modified)
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.35;
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: linear-gradient(to bottom, black, transparent 85%);
         }
 
-        </span></div> </div> </article> `).join("");
+        .page {
+            position: relative;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px 56px;
+        }
 
-    document.querySelectorAll(".round").forEach(card=> {
-            card.addEventListener("click", ()=> {
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 28px;
+            align-items: stretch;
+            margin-bottom: 26px;
+        }
+
+        .hero-card,
+        .activity-card,
+        .pipeline-card,
+        .insight-card {
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-shadow: var(--shadow);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-card {
+            padding: 36px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-card::after {
+            content: "01001000 01100001 01110011 01101000";
+            position: absolute;
+            right: -40px;
+            bottom: 18px;
+            font-family: var(--mono);
+            font-size: 34px;
+            letter-spacing: 4px;
+            transform: rotate(-8deg);
+            color: rgba(0, 0, 0, 0.055);
+            white-space: nowrap;
+        }
+
+        .eyebrow {
+            font-family: var(--mono);
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(42px, 6vw, 78px);
+            line-height: 0.92;
+            letter-spacing: -0.06em;
+            font-weight: 900;
+        }
+
+        .hero-card p {
+            max-width: 780px;
+            margin: 22px 0 0;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1.55;
+        }
+
+        .score-card {
+            padding: 30px;
+            display: grid;
+            gap: 18px;
+            align-content: center;
+        }
+
+        .score-big {
+            font-size: 84px;
+            font-weight: 900;
+            letter-spacing: -0.08em;
+            line-height: 0.85;
+        }
+
+        .score-card p {
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .progress-shell {
+            height: 14px;
+            background: var(--soft);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: repeating-linear-gradient(45deg, #222, #222 8px, #444 8px, #444 16px);
+            transition: width 450ms cubic-bezier(.2, .9, .2, 1);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 26px;
+            align-items: start;
+        }
+
+        .activity-card {
+            padding: 24px;
+            position: sticky;
+            top: 20px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: -0.04em;
+        }
+
+        .tiny {
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        .rounds {
+            display: grid;
+            gap: 14px;
+        }
+
+        .round {
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            background: #fbfbfa;
+            padding: 16px;
+            cursor: pointer;
+            transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+        }
+
+        .round:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .round.active {
+            border-color: #171717;
+            background: #fff;
+            box-shadow: inset 0 0 0 2px #171717, 0 14px 28px rgba(0, 0, 0, 0.09);
+        }
+
+        .round.done {
+            background: #f0f0ed;
+        }
+
+        .round-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .round-label {
+            font-weight: 850;
+            letter-spacing: -0.03em;
+        }
+
+        .badge {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--dark);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--dark);
+            background: #fff;
+        }
+
+        .pair {
+            font-family: var(--mono);
+            display: grid;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .line {
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .line strong {
+            min-width: 32px;
+            color: var(--muted);
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .changed {
+            outline: 2px solid #171717;
+            outline-offset: 2px;
+            border-radius: 4px;
+            background: #e4e4df;
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        button {
+            appearance: none;
+            border: 1px solid #171717;
+            background: #171717;
+            color: #fff;
+            border-radius: 999px;
+            padding: 13px 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        button.secondary {
+            background: transparent;
+            color: #171717;
+        }
+
+        .pipeline-card {
+            padding: 26px;
+            min-height: 690px;
+        }
+
+        .example-stage {
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            padding: 22px;
+            background: #fbfbfa;
+            margin-bottom: 22px;
+        }
+
+        .compare-head {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .message-box {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 18px;
+        }
+
+        .message-box h3 {
+            margin: 0 0 10px;
+            font-size: 13px;
+            color: var(--muted);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-family: var(--mono);
+        }
+
+        .message-text {
+            margin: 0;
+            font-family: var(--mono);
+            font-size: clamp(18px, 2vw, 26px);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            white-space: nowrap;
+        }
+
+        .vs {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #171717;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            background: #fff;
+        }
+
+        .difference-note {
+            margin-top: 16px;
+            border-left: 4px solid #171717;
+            padding: 12px 14px;
+            background: #eeeeea;
+            color: var(--dark);
+            line-height: 1.4;
+            display: none;
+        }
+
+        .difference-note.show {
+            display: block;
+        }
+
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .step {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 18px;
+            padding: 16px 12px;
+            min-height: 132px;
+            position: relative;
+            opacity: 0.36;
+            transform: translateY(8px);
+            transition: opacity 280ms ease, transform 280ms ease, border-color 280ms ease, box-shadow 280ms ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            transform: translateY(0);
+            border-color: #171717;
+            box-shadow: inset 0 0 0 2px #171717, 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .step.done {
+            opacity: 0.78;
+            transform: translateY(0);
+        }
+
+        .step-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 1px solid #171717;
+            display: grid;
+            place-items: center;
+            font-family: var(--mono);
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .step h3 {
+            margin: 0 0 8px;
+            font-size: 14px;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .step p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .live-box {
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            background: #fff;
+            padding: 22px;
+            min-height: 250px;
+        }
+
+        .live-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .live-title {
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: -0.04em;
+        }
+
+        .state-pill {
+            border: 1px solid var(--line);
+            background: #f8f8f6;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .output {
+            background: #f8f8f6;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            min-height: 148px;
+            overflow: hidden;
+        }
+
+        .output h4 {
+            margin: 0 0 10px;
+            font-family: var(--mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.12em;
+        }
+
+        .code {
+            font-family: var(--mono);
+            word-break: break-all;
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .hash {
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .block {
+            min-width: 42px;
+            text-align: center;
+            border: 1px solid #171717;
+            background: #fff;
+            padding: 7px 8px;
+            border-radius: 10px;
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+
+        .digest-compare {
+            display: none;
+            margin-top: 18px;
+            padding: 18px;
+            border-radius: var(--radius-lg);
+            background: #eeeeea;
+            border: 1px solid #171717;
+        }
+
+        .digest-compare.show {
+            display: block;
+        }
+
+        .digest-compare strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 6px;
+        }
+
+        .digest-compare p {
+            margin: 0;
+            color: var(--dark);
+            line-height: 1.45;
+        }
+
+        .insight-card {
+            margin-top: 26px;
+            padding: 26px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .insight {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .insight b {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 8px;
+            letter-spacing: -0.03em;
+        }
+
+        .insight span {
+            color: var(--muted);
+            line-height: 1.45;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1000px) {
+
+            .hero,
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-card {
+                position: static;
+            }
+
+            .pipeline {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .compare-head {
+                grid-template-columns: 1fr;
+            }
+
+            .vs {
+                margin: 0 auto;
+            }
+
+            .insight-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .page {
+                padding: 22px 14px 34px;
+            }
+
+            .hero-card,
+            .activity-card,
+            .pipeline-card {
+                padding: 20px;
+            }
+
+            .pipeline,
+            .output-grid,
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+
+            .message-text {
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <section class="hero">
+            <div class="hero-card">
+                <div>
+                    <div class="eyebrow">Interactive cryptography activity</div>
+                    <h1>Can You Spot the Change?</h1>
+                    <p>
+                        Choose a round, then watch both messages go through the same hash-function pipeline.
+                        The point is simple: humans may miss tiny changes, but a cryptographic hash function exposes
+                        them through a different digest.
+                    </p>
+                </div>
+            </div>
+
+            <div class="hero-card score-card">
+                <div>
+                    <div class="eyebrow">Rounds completed</div>
+                    <div class="score-big"><span id="score">0</span>/3</div>
+                </div>
+                <div class="progress-shell">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <p>Finish all three rounds to reveal the core lesson behind data integrity and digital fingerprints.</p>
+            </div>
+        </section>
+
+        <section class="layout">
+            <aside class="activity-card">
+                <div class="section-title">
+                    <h2>Choose a Round</h2>
+                    <span class="tiny">click to inspect</span>
+                </div>
+
+                <div class="rounds" id="rounds"></div>
+
+                <div class="button-row">
+                    <button id="runBtn">Run Pipeline</button>
+                    <button class="secondary" id="resetBtn">Reset</button>
+                </div>
+            </aside>
+
+            <section class="pipeline-card">
+                <div class="section-title">
+                    <h2 id="roundTitle">Round 1: Deadline Trap</h2>
+                    <span class="tiny">real SHA-256 digest</span>
+                </div>
+
+                <div class="example-stage">
+                    <div class="compare-head">
+                        <div class="message-box">
+                            <h3>Original</h3>
+                            <p class="message-text" id="originalText"></p>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="message-box">
+                            <h3>Modified</h3>
+                            <p class="message-text" id="modifiedText"></p>
+                        </div>
+                    </div>
+                    <div class="difference-note" id="differenceNote"></div>
+                </div>
+
+                <div class="pipeline" id="pipeline"></div>
+
+                <div class="live-box">
+                    <div class="live-top">
+                        <div class="live-title" id="liveTitle">Ready to hash</div>
+                        <div class="state-pill" id="statePill">Step 0 / 5</div>
+                    </div>
+
+                    <div class="output-grid">
+                        <div class="output">
+                            <h4>Original path</h4>
+                            <div class="code" id="originalOutput">Click “Run Pipeline” to start.</div>
+                        </div>
+                        <div class="output">
+                            <h4>Modified path</h4>
+                            <div class="code" id="modifiedOutput">The modified message will be processed in parallel.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="digest-compare" id="digestCompare">
+                        <strong>Result: same-looking messages, different fingerprints.</strong>
+                        <p id="lessonText"></p>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <section class="insight-card">
+            <div class="insight">
+                <b>1. Integrity</b>
+                <span>A digest helps verify that a message, file, or transaction was not silently changed.</span>
+            </div>
+            <div class="insight">
+                <b>2. One tiny change</b>
+                <span>Changing one character is enough to produce a completely different SHA-256 digest.</span>
+            </div>
+            <div class="insight">
+                <b>3. Human vs hash</b>
+                <span>A human may miss the difference; a hash function treats the data exactly byte by byte.</span>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const examples = [
+            {
+                title: "Round 1: Deadline Trap",
+                original: "Submit before 11:59 PM.",
+                modified: "Submit before 11:59 AM.",
+                diff: "Only two letters changed: PM became AM. To a student, that can change the entire deadline.",
+                lesson: "The deadline message looks almost the same, but the digest proves the data is no longer identical."
+            },
+            {
+                title: "Round 2: Payment Trap",
+                original: "Pay 500 EGP to Omar.",
+                modified: "Pay 500 EGP to 0mar.",
+                diff: "The letter O in Omar was replaced with the number 0. It is visually similar, but digitally different.",
+                lesson: "The name appears close to the human eye, but hashing exposes that the actual bytes changed."
+            },
+            {
+                title: "Round 3: File Trust Trap",
+                original: "I trust this file.",
+                modified: "I trust this fi1e.",
+                diff: "The letter l in file was replaced with the number 1. This is a classic hidden-character trick.",
+                lesson: "Even a tiny character replacement creates a new digital fingerprint."
+            }
+        ];
+
+        const steps = [
+            { title: "Input", desc: "Take the exact message text." },
+            { title: "Bytes", desc: "Convert every character into bytes." },
+            { title: "Padding", desc: "Prepare data to fit fixed-size blocks." },
+            { title: "Blocks", desc: "Split prepared data into chunks." },
+            { title: "Compress", desc: "Mix blocks using SHA-256 operations." },
+            { title: "Digest", desc: "Output the final fixed-length fingerprint." }
+        ];
+
+        let selected = 0;
+        let completed = new Set();
+        let running = false;
+
+        const roundsEl = document.getElementById("rounds");
+        const pipelineEl = document.getElementById("pipeline");
+        const scoreEl = document.getElementById("score");
+        const progressEl = document.getElementById("progress");
+        const originalTextEl = document.getElementById("originalText");
+        const modifiedTextEl = document.getElementById("modifiedText");
+        const roundTitleEl = document.getElementById("roundTitle");
+        const differenceNoteEl = document.getElementById("differenceNote");
+        const originalOutputEl = document.getElementById("originalOutput");
+        const modifiedOutputEl = document.getElementById("modifiedOutput");
+        const liveTitleEl = document.getElementById("liveTitle");
+        const statePillEl = document.getElementById("statePill");
+        const digestCompareEl = document.getElementById("digestCompare");
+        const lessonTextEl = document.getElementById("lessonText");
+
+        function renderRounds() {
+            roundsEl.innerHTML = examples.map((ex, i) => `
+        <article class="round ${i === selected ? "active" : ""} ${completed.has(i) ? "done" : ""}" data-index="${i}">
+          <div class="round-head">
+            <div class="round-label">Round ${i + 1}</div>
+            <div class="badge">${completed.has(i) ? "✓" : "?"}</div>
+          </div>
+          <div class="pair">
+            <div class="line"><strong>A</strong><span>${escapeHTML(ex.original)}</span></div>
+            <div class="line"><strong>B</strong><span>${escapeHTML(ex.modified)}</span></div>
+          </div>
+        </article>
+      `).join("");
+
+            document.querySelectorAll(".round").forEach(card => {
+                card.addEventListener("click", () => {
                     if (running) return;
-                    selected=Number(card.dataset.index);
+                    selected = Number(card.dataset.index);
                     renderAll();
                 });
-        });
-}
-
-function renderPipeline(active=-1) {
-    pipelineEl.innerHTML=steps.map((step, i)=> ` <div class="step ${i === active ? " active" : i < active ? " done" : " "}" > <div class="step-num" >$ {
-            i + 1
+            });
         }
 
-        </div> <h3>$ {
-            step.title
+        function renderPipeline(active = -1) {
+            pipelineEl.innerHTML = steps.map((step, i) => `
+        <div class="step ${i === active ? "active" : i < active ? "done" : ""}">
+          <div class="step-num">${i + 1}</div>
+          <h3>${step.title}</h3>
+          <p>${step.desc}</p>
+        </div>
+      `).join("");
         }
 
-        </h3> <p>$ {
-            step.desc
+        function renderSelected() {
+            const ex = examples[selected];
+            roundTitleEl.textContent = ex.title;
+            originalTextEl.innerHTML = highlightDiff(ex.original, ex.modified, "original");
+            modifiedTextEl.innerHTML = highlightDiff(ex.original, ex.modified, "modified");
+            differenceNoteEl.classList.remove("show");
+            differenceNoteEl.textContent = ex.diff;
+            originalOutputEl.textContent = "Click “Run Pipeline” to start.";
+            modifiedOutputEl.textContent = "The modified message will be processed in parallel.";
+            liveTitleEl.textContent = "Ready to hash";
+            statePillEl.textContent = "Step 0 / 6";
+            digestCompareEl.classList.remove("show");
+            lessonTextEl.textContent = "";
         }
 
-        </p> </div> `).join("");
-}
+        function renderScore() {
+            scoreEl.textContent = completed.size;
+            progressEl.style.width = `${(completed.size / examples.length) * 100}%`;
+        }
 
-function renderSelected() {
-    const ex=examples[selected];
-    roundTitleEl.textContent=ex.title;
-    originalTextEl.innerHTML=highlightDiff(ex.original, ex.modified, "original");
-    modifiedTextEl.innerHTML=highlightDiff(ex.original, ex.modified, "modified");
-    differenceNoteEl.classList.remove("show");
-    differenceNoteEl.textContent=ex.diff;
-    originalOutputEl.textContent="Click “Run Pipeline” to start.";
-    modifiedOutputEl.textContent="The modified message will be processed in parallel.";
-    liveTitleEl.textContent="Ready to hash";
-    statePillEl.textContent="Step 0 / 6";
-    digestCompareEl.classList.remove("show");
-    lessonTextEl.textContent="";
-}
+        function renderAll() {
+            renderRounds();
+            renderPipeline();
+            renderSelected();
+            renderScore();
+        }
 
-function renderScore() {
-    scoreEl.textContent=completed.size;
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>"']/g, function (ch) {
+                return {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    "\"": "&quot;",
+                    "'": "&#39;"
+                }[ch];
+            });
+        }
 
-    progressEl.style.width=`$ {
-        (completed.size / examples.length) * 100
-    }
-
-    %`;
-}
-
-function renderAll() {
-    renderRounds();
-    renderPipeline();
-    renderSelected();
-    renderScore();
-}
-
-function escapeHTML(str) {
-    return str.replace(/[&<>'"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","' ":" &#39; "," \"":" &quot; "}[ch]));
-
-    }
-
-    function highlightDiff(a, b, side) {
-        let html="";
-        const max=Math.max(a.length, b.length);
-
-        for (let i=0; i < max; i++) {
-            const ca=a[i] || "";
-            const cb=b[i] || "";
-            const current=side==="original" ? ca : cb;
-            if ( !current) continue;
-            const safe=escapeHTML(current);
-
-            if (ca !==cb) html +=`<span class="changed" >$ {
-                safe
+        function highlightDiff(a, b, side) {
+            let html = "";
+            const max = Math.max(a.length, b.length);
+            for (let i = 0; i < max; i++) {
+                const ca = a[i] || "";
+                const cb = b[i] || "";
+                const current = side === "original" ? ca : cb;
+                if (!current) continue;
+                const safe = escapeHTML(current);
+                if (ca !== cb) html += `<span class="changed">${safe}</span>`;
+                else html += safe;
             }
-
-            </span>`;
-            else html +=safe;
+            return html;
         }
 
-        return html;
-    }
-
-    function toHexBytes(str) {
-        const bytes=new TextEncoder().encode(str);
-        return Array.from(bytes).map(b=> b.toString(16).toUpperCase().padStart(2, "0"));
-    }
-
-    function blocksHTML(items, limit=16) {
-        const visible=items.slice(0, limit);
-
-        const more=items.length > limit ? [`+$ {
-            items.length - limit
+        function toHexBytes(str) {
+            const bytes = new TextEncoder().encode(str);
+            return Array.from(bytes).map(b => b.toString(16).toUpperCase().padStart(2, "0"));
         }
 
-        `] : [];
+        function blocksHTML(items, limit = 16) {
+            const visible = items.slice(0, limit);
+            const more = items.length > limit ? [`+${items.length - limit}`] : [];
+            return `<div class="blocks">${[...visible, ...more].map(x => `<span class="block">${x}</span>`).join("")}</div>`;
+        }
 
-        return `<div class="blocks" >$ {
-            [...visible, ...more].map(x=> `<span class="block" >$ {
-                    x
+        async function sha256(str) {
+            const data = new TextEncoder().encode(str);
+            const buffer = await crypto.subtle.digest("SHA-256", data);
+            return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        async function runPipeline() {
+            if (running) return;
+            running = true;
+            const ex = examples[selected];
+            digestCompareEl.classList.remove("show");
+            differenceNoteEl.classList.remove("show");
+
+            const originalBytes = toHexBytes(ex.original);
+            const modifiedBytes = toHexBytes(ex.modified);
+            const originalHash = await sha256(ex.original);
+            const modifiedHash = await sha256(ex.modified);
+
+            const stepOutputs = [
+                {
+                    title: "Step 1: Exact Input",
+                    left: `Message received:<br><br><strong>${escapeHTML(ex.original)}</strong>`,
+                    right: `Message received:<br><br><strong>${escapeHTML(ex.modified)}</strong>`
+                },
+                {
+                    title: "Step 2: Convert to Bytes",
+                    left: blocksHTML(originalBytes),
+                    right: blocksHTML(modifiedBytes)
+                },
+                {
+                    title: "Step 3: Add Padding",
+                    left: blocksHTML([...originalBytes.slice(0, 10), "80", "00", "00", "LEN"]),
+                    right: blocksHTML([...modifiedBytes.slice(0, 10), "80", "00", "00", "LEN"])
+                },
+                {
+                    title: "Step 4: Split into Blocks",
+                    left: blocksHTML(["Block 1", "Block 2", "...", "512-bit chunks"]),
+                    right: blocksHTML(["Block 1", "Block 2", "...", "512-bit chunks"])
+                },
+                {
+                    title: "Step 5: Compress and Mix",
+                    left: `H0 + Block 1 → H1<br>H1 + Block 2 → H2<br><br><span class="tiny">State keeps changing</span>`,
+                    right: `H0 + Block 1 → H1<br>H1 + Block 2 → H2<br><br><span class="tiny">One byte difference affects the state</span>`
+                },
+                {
+                    title: "Step 6: Final Digest",
+                    left: `<span class="hash">${originalHash}</span>`,
+                    right: `<span class="hash">${modifiedHash}</span>`
                 }
+            ];
 
-                </span>`).join("")
-        }
-
-        </div>`;
-    }
-
-    async function sha256(str) {
-        const data=new TextEncoder().encode(str);
-        const buffer=await crypto.subtle.digest("SHA-256", data);
-        return Array.from(new Uint8Array(buffer)).map(b=> b.toString(16).padStart(2, "0")).join("");
-    }
-
-    const sleep=ms=> new Promise(resolve=> setTimeout(resolve, ms));
-
-    async function runPipeline() {
-        if (running) return;
-        running=true;
-        const ex=examples[selected];
-        digestCompareEl.classList.remove("show");
-        differenceNoteEl.classList.remove("show");
-
-        const originalBytes=toHexBytes(ex.original);
-        const modifiedBytes=toHexBytes(ex.modified);
-        const originalHash=await sha256(ex.original);
-        const modifiedHash=await sha256(ex.modified);
-
-        const stepOutputs=[ {
-
-            title: "Step 1: Exact Input",
-            left: `Message received:<br><br><strong>$ {
-                escapeHTML(ex.original)
+            for (let i = 0; i < stepOutputs.length; i++) {
+                renderPipeline(i);
+                liveTitleEl.textContent = stepOutputs[i].title;
+                statePillEl.textContent = `Step ${i + 1} / 6`;
+                originalOutputEl.innerHTML = stepOutputs[i].left;
+                modifiedOutputEl.innerHTML = stepOutputs[i].right;
+                await sleep(i === stepOutputs.length - 1 ? 900 : 1200);
             }
 
-            </strong>`,
-            right: `Message received:<br><br><strong>$ {
-                escapeHTML(ex.modified)
-            }
-
-            </strong>`
+            differenceNoteEl.classList.add("show");
+            digestCompareEl.classList.add("show");
+            lessonTextEl.textContent = ex.lesson;
+            completed.add(selected);
+            renderRounds();
+            renderScore();
+            running = false;
         }
 
-        ,
-        {
-        title: "Step 2: Convert to Bytes",
-        left: blocksHTML(originalBytes),
-        right: blocksHTML(modifiedBytes)
-    }
+        function resetAll() {
+            if (running) return;
+            completed.clear();
+            renderAll();
+        }
 
-    ,
-    {
-    title: "Step 3: Add Padding",
-    left: blocksHTML([...originalBytes.slice(0, 10), "80", "00", "00", "LEN"]),
-    right: blocksHTML([...modifiedBytes.slice(0, 10), "80", "00", "00", "LEN"])
-}
+        document.getElementById("runBtn").addEventListener("click", runPipeline);
+        document.getElementById("resetBtn").addEventListener("click", resetAll);
 
-,
-{
-title: "Step 4: Split into Blocks",
-left: blocksHTML(["Block 1", "Block 2", "...", "512-bit chunks"]),
-right: blocksHTML(["Block 1", "Block 2", "...", "512-bit chunks"])
-}
+        renderAll();
+    </script>
+</body>
 
-,
-{
-title: "Step 5: Compress and Mix",
-left: `H0 + Block 1 → H1<br>H1 + Block 2 → H2<br><br><span class="tiny" >State keeps changing</span>`,
-right: `H0 + Block 1 → H1<br>H1 + Block 2 → H2<br><br><span class="tiny" >One byte difference affects the state</span>`
-}
-
-,
-{
-
-title: "Step 6: Final Digest",
-left: `<span class="hash" >$ {
-    originalHash
-}
-
-</span>`,
-right: `<span class="hash" >$ {
-    modifiedHash
-}
-
-</span>`
-}
-
-];
-
-for (let i=0; i < stepOutputs.length; i++) {
-    renderPipeline(i);
-    liveTitleEl.textContent=stepOutputs[i].title;
-
-    statePillEl.textContent=`Step $ {
-        i + 1
-    }
-
-    / 6`;
-    originalOutputEl.innerHTML=stepOutputs[i].left;
-    modifiedOutputEl.innerHTML=stepOutputs[i].right;
-    await sleep(i===stepOutputs.length - 1 ? 900 : 1200);
-}
-
-differenceNoteEl.classList.add("show");
-digestCompareEl.classList.add("show");
-lessonTextEl.textContent=ex.lesson;
-completed.add(selected);
-renderRounds();
-renderScore();
-running=false;
-}
-
-function resetAll() {
-    if (running) return;
-    completed.clear();
-    renderAll();
-}
-
-document.getElementById("runBtn").addEventListener("click", runPipeline);
-document.getElementById("resetBtn").addEventListener("click", resetAll);
-
-renderAll();
-</script> </body> </html>
+</html>
